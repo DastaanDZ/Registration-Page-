@@ -1,11 +1,13 @@
 const express = require('express');
 const app = express();
 const hbs = require('hbs');
+
 require('./db/conn');
 
 const Register = require('./models/registers');
 const path = require('path');
 const async = require('hbs/lib/async');
+const bcrypt = require('bcryptjs');
 const port = process.env.PORT || 3000;
 
 // const static_path = path.join(__dirname, '../public');
@@ -25,14 +27,54 @@ app.get('/register',(req,res) =>{
     res.render('register');
 })
 
+app.get('/login',(req,res) =>{
+    res.render('login');
+})
+
 app.post("/register", async(req,res) =>{
     try{
-        console.log(req.body.fullname);
-        res.send(req.body.fullname);
+        const password = req.body.password;
+        const confirmpassword = req.body.confirmpassword;
+
+        if(password === confirmpassword){
+            const register = new Register({
+                fullname: req.body.fullname,
+                username: req.body.username,
+                email: req.body.email,
+                phone: req.body.phone,
+                password: password,
+                confirmpassword: confirmpassword
+            })
+            const registered = await register.save();
+            res.status(201).render('index');
+        }
+        else{
+            res.send('password and confirmpassword not match');
+        }
     }catch(e){
-        res.status(400).send(e);
+        console.log(e);
+        res.status(400).send("FUCK YOU");
     }
 });
+app.post('/login',async(req,res) =>{
+    // res.render('login');
+    try {
+        const email = req.body.email;
+        const password = req.body.password;
+        console.log(email,password);
+        const useremail = await Register.findOne({email:email});
+        console.log(useremail.password);
+        const isMatch = await bcrypt.compare(password,useremail.password)
+        console.log(isMatch)
+        if(isMatch ){
+                res.status(201).render('index');
+        }else{
+            res.send('password not match');
+        }
+    }catch(error){
+        res.status(400).send(error);
+    }
+})
 
 app.listen(3000,() =>{
     console.log("Server is running on port 3000");

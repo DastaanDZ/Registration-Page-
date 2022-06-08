@@ -45,6 +45,10 @@ app.post("/register", async(req,res) =>{
                 password: password,
                 confirmpassword: confirmpassword
             })
+
+            const token = await register.generateAuthToken();
+            
+
             const registered = await register.save();
             res.status(201).render('index');
         }

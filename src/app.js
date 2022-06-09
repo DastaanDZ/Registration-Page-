@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const hbs = require('hbs');
@@ -10,6 +11,7 @@ const async = require('hbs/lib/async');
 const bcrypt = require('bcryptjs');
 const port = process.env.PORT || 3000;
 
+
 // const static_path = path.join(__dirname, '../public');
 // app.use(express.static(static_path));
 const template_path = path.join(__dirname, '../templates/views');
@@ -19,6 +21,8 @@ app.use(express.urlencoded({extended: false}));
 app.set('view engine','hbs');
 app.set('views',template_path);
 hbs.registerPartials(partials_path);
+
+// console.log(process.env.SECRET_KEY)
 
 app.get("/",(req,res) =>{
     res.render('index');
@@ -47,7 +51,11 @@ app.post("/register", async(req,res) =>{
             })
 
             const token = await register.generateAuthToken();
-            
+
+            res.cookie('jwt', token, {
+                expires: new Date(Date.now() + 3000),
+                httpOnly: true
+            })
 
             const registered = await register.save();
             res.status(201).render('index');
@@ -70,6 +78,10 @@ app.post('/login',async(req,res) =>{
         console.log(useremail.password);
         const isMatch = await bcrypt.compare(password,useremail.password)
         console.log(isMatch)
+
+        const token = await useremail.generateAuthToken();
+        console.log('login token' + token);
+
         if(isMatch ){
                 res.status(201).render('index');
         }else{

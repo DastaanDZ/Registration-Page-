@@ -2,8 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const hbs = require('hbs');
-
+const cookieParser = require('cookie-parser');
 require('./db/conn');
+const jwt = require('jsonwebtoken');
 
 const Register = require('./models/registers');
 const path = require('path');
@@ -17,6 +18,7 @@ const port = process.env.PORT || 3000;
 const template_path = path.join(__dirname, '../templates/views');
 const partials_path = path.join(__dirname, '../templates/partials');
 app.use(express.json())
+app.use(cookieParser())
 app.use(express.urlencoded({extended: false}));
 app.set('view engine','hbs');
 app.set('views',template_path);
@@ -26,6 +28,10 @@ hbs.registerPartials(partials_path);
 
 app.get("/",(req,res) =>{
     res.render('index');
+});
+app.get("/secret",(req,res) =>{
+    console.log(`this is the cookie awesome ${req.cookies.jwt}`);
+    res.render('secret');
 });
 app.get('/register',(req,res) =>{
     res.render('register');
@@ -81,6 +87,12 @@ app.post('/login',async(req,res) =>{
 
         const token = await useremail.generateAuthToken();
         console.log('login token' + token);
+
+        res.cookie('jwt', token,{
+            expires: new Date(Date.now() + 3000),
+            httpOnly: true,
+        })
+
 
         if(isMatch ){
                 res.status(201).render('index');

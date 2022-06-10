@@ -60,7 +60,7 @@ app.post("/register", async(req,res) =>{
             const token = await register.generateAuthToken();
 
             res.cookie('jwt', token, {
-                expires: new Date(Date.now() + 3000),
+                expires: new Date(Date.now() + 300000),
                 httpOnly: true
             })
 
@@ -87,10 +87,10 @@ app.post('/login',async(req,res) =>{
         console.log(isMatch)
 
         const token = await useremail.generateAuthToken();
-        console.log('login token' + token);
+        console.log('login token: ' + token);
 
         res.cookie('jwt', token,{
-            expires: new Date(Date.now() + 3000),
+            // expires: new Date(Date.now() + 3000),
             httpOnly: true,
         })
 

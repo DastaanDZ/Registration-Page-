@@ -5,6 +5,7 @@ const hbs = require('hbs');
 const cookieParser = require('cookie-parser');
 require('./db/conn');
 const jwt = require('jsonwebtoken');
+const auth = require('./middleware/auth');
 
 const Register = require('./models/registers');
 const path = require('path');
@@ -29,7 +30,7 @@ hbs.registerPartials(partials_path);
 app.get("/",(req,res) =>{
     res.render('index');
 });
-app.get("/secret",(req,res) =>{
+app.get("/secret",auth,(req,res) =>{
     console.log(`this is the cookie awesome ${req.cookies.jwt}`);
     res.render('secret');
 });

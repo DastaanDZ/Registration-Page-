@@ -34,6 +34,22 @@ app.get("/secret",auth,(req,res) =>{
     console.log(`this is the cookie awesome ${req.cookies.jwt}`);
     res.render('secret');
 });
+app.get('/logout',auth, async(req,res) =>{
+    try{
+        res.clearCookie('jwt');
+
+        req.user.tokens = req.user.tokens.filter((currElem) =>{
+            return currElem.token !== req.token;
+        })
+
+        console.log('logout successful');
+        await req.user.save();
+        res.render('login');
+    } catch(err){
+        res.status(500).send(err)
+    }
+})
+
 app.get('/register',(req,res) =>{
     res.render('register');
 })
